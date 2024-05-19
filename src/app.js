@@ -25,3 +25,17 @@ app.get('/jugador', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`)
 })
+
+process.on('SIGTERM', () => {
+  connection.end(() => {
+    console.log('Connection to db closed')
+    process.exit(0)
+  })
+})
+
+process.on('SIGINT', () => {
+  connection.end(() => {
+    console.log('Connection to db closed')
+    process.exit(0)
+  })
+})
