@@ -1,7 +1,14 @@
 import express from 'express'
 import connection from './db.js'
-const PORT = process.env.PORT || 3000
+import Match from './models/Match.js'
+import Player from './models/Player.js'
+import Club from './models/Club.js'
+import Tournament from './models/Tournament.js'
+import Referee from './models/Referee.js'
+import PlayerStatistics from './models/PlayerStatistics.js'
+import ClubScore from './models/ClubScore.js'
 
+const PORT = process.env.PORT || 3000
 const app = express()
 
 connection.connect((err) => {
@@ -15,130 +22,145 @@ app.get('/', (req, res) => {
   res.send('Hello, World!')
 })
 
-app.get('/jugador', (req, res) => {
-  connection.query('SELECT * FROM jugador;', (err, rows, fields) => {
+app.get('/player', (req, res) => {
+  connection.query('SELECT * FROM jugador;', (err, rows) => {
     if (err) throw err
-    res.json(rows)
+    res.json(Player.fromDbRows(rows))
   })
 })
-app.get('/jugador/:id', (req, res) => {
-  const jugadorId = req.params.id
+
+app.get('/player/:id', (req, res) => {
+  const playerId = req.params.id
   connection.query(
-    `SELECT * FROM jugador WHERE ID = ? ;`,
-    [jugadorId],
-    (err, rows, fields) => {
+    'SELECT * FROM jugador WHERE ID = ?;',
+    [playerId],
+    (err, rows) => {
       if (err) throw err
-      res.json(rows)
+      if (rows.length === 0) {
+        res.status(404).json({ message: 'Player not found' })
+        return
+      }
+      res.json(Player.fromDbRow(rows[0]))
     }
   )
 })
 
 app.get('/club', (req, res) => {
-  connection.query('SELECT * FROM club;', (err, rows, fields) => {
+  connection.query('SELECT * FROM club;', (err, rows) => {
     if (err) throw err
-    res.json(rows)
+    res.json(Club.fromDbRows(rows))
   })
 })
 
-app.get('/torneo', (req, res) => {
-  connection.query('SELECT * FROM torneo;', (err, rows, fields) => {
-    if (err) throw err
-    res.json(rows)
-  })
-})
-
-app.get('/arbitro', (req, res) => {
-  connection.query('SELECT * FROM arbitro;', (err, rows, fields) => {
-    if (err) throw err
-    res.json(rows)
-  })
-})
-
-app.get('/partido', (req, res) => {
-  connection.query('SELECT * FROM partido;', (err, rows, fields) => {
-    if (err) throw err
-    res.json(rows)
-  })
-})
-
-app.get('/partido/:id', (req, res) => {
-  const partidoId = req.params.id
+app.get('/club/:id', (req, res) => {
+  const clubId = req.params.id
   connection.query(
-    `SELECT p.ID AS partido_id,
-              p.ID_arbitro,
-              p.ID_jugador1,
-              CONCAT(j1.nombre, ' ', j1.apellido) AS nombre_jugador1,
-              j1.rating AS jugador1_rating,
-              p.ID_jugador2,
-              CONCAT(j2.nombre, ' ', j2.apellido) AS nombre_jugador2,
-              j2.rating AS jugador2_rating,
-              p.ID_torneo,
-              p.instancia,
-              s.numero_set,
-              s.player1_games_won,
-              s.player2_games_won
-       FROM partido p
-       LEFT JOIN sets s ON p.ID = s.ID_partido
-       INNER JOIN jugador j1 ON p.ID_jugador1 = j1.ID
-       INNER JOIN jugador j2 ON p.ID_jugador2 = j2.ID
-       WHERE p.ID = ?
-       ORDER BY s.numero_set ASC`,
-    [partidoId],
-    (err, rows, fields) => {
+    'SELECT * FROM club WHERE ID = ?;',
+    [clubId],
+    (err, rows) => {
       if (err) throw err
-
       if (rows.length === 0) {
-        res.status(404).json({ message: 'Partido no encontrado' })
+        res.status(404).json({ message: 'Club not found' })
         return
       }
-
-      const partido = {
-        ID: rows[0].partido_id,
-        ID_arbitro: rows[0].ID_arbitro,
-        ID_jugador1: rows[0].ID_jugador1,
-        nombre_jugador1: rows[0].nombre_jugador1,
-        jugador1_rating: rows[0].jugador1_rating,
-        ID_jugador2: rows[0].ID_jugador2,
-        nombre_jugador2: rows[0].nombre_jugador2,
-        jugador2_rating: rows[0].jugador2_rating,
-        ID_torneo: rows[0].ID_torneo,
-        instancia: rows[0].instancia,
-        sets: rows.map((row) => ({
-          numero_set: row.numero_set,
-          player1_games_ganados: row.player1_games_won,
-          player2_games_ganados: row.player2_games_won,
-        })),
-      }
-
-      res.json(partido)
+      res.json(Club.fromDbRow(rows[0]))
     }
   )
 })
 
-app.get('/estadisticas_jugadores', (req, res) => {
+app.get('/tournament', (req, res) => {
+  connection.query('SELECT * FROM torneo;', (err, rows) => {
+    if (err) throw err
+    res.json(Tournament.fromDbRows(rows))
+  })
+})
+
+app.get('/tournament/:id', (req, res) => {
+  const tournamentId = req.params.id
   connection.query(
-    'SELECT * FROM estadisticas_jugadores;',
-    (err, rows, fields) => {
+    'SELECT * FROM torneo WHERE ID = ?;',
+    [tournamentId],
+    (err, rows) => {
       if (err) throw err
-      res.json(rows)
+      if (rows.length === 0) {
+        res.status(404).json({ message: 'Tournament not found' })
+        return
+      }
+      res.json(Tournament.fromDbRow(rows[0]))
     }
   )
 })
 
-app.get('/puntaje_maximo_club', (req, res) => {
+app.get('/referee', (req, res) => {
+  connection.query('SELECT * FROM arbitro;', (err, rows) => {
+    if (err) throw err
+    res.json(Referee.fromDbRows(rows))
+  })
+})
+
+app.get('/referee/:id', (req, res) => {
+  const refereeId = req.params.id
+  connection.query(
+    'SELECT * FROM arbitro WHERE ID = ?;',
+    [refereeId],
+    (err, rows) => {
+      if (err) throw err
+      if (rows.length === 0) {
+        res.status(404).json({ message: 'Referee not found' })
+        return
+      }
+      res.json(Referee.fromDbRow(rows[0]))
+    }
+  )
+})
+
+app.get('/match', (req, res) => {
+  connection.query(
+    'SELECT * FROM MatchView ORDER BY match_id ASC;',
+    (err, rows) => {
+      if (err) throw err
+      res.json(Match.fromDbRows(rows))
+    }
+  )
+})
+
+app.get('/match/:id', (req, res) => {
+  const matchId = req.params.id
+  connection.query(
+    'SELECT * FROM MatchView WHERE match_id = ?;',
+    [matchId],
+    (err, rows) => {
+      if (err) throw err
+      if (rows.length === 0) {
+        res.status(404).json({ message: 'Match not found' })
+        return
+      }
+      res.json(Match.fromDbRow(rows[0]))
+    }
+  )
+})
+
+app.get('/player_statistics', (req, res) => {
+  connection.query('SELECT * FROM estadisticas_jugadores;', (err, rows) => {
+    if (err) throw err
+    res.json(PlayerStatistics.fromDbRows(rows))
+  })
+})
+
+app.get('/club_score', (req, res) => {
   connection.query(
     'SELECT * FROM puntaje_maximo_club ORDER BY puntaje_maximo DESC;',
-    (err, rows, fields) => {
+    (err, rows) => {
       if (err) throw err
-      res.json(rows)
+      res.json(ClubScore.fromDbRows(rows))
     }
   )
 })
 
-app.get('/ranking_jugadores', (req, res) => {
-  connection.query('SELECT * FROM ranking_jugadores;', (err, rows, fields) => {
+app.get('/player_ranking', (req, res) => {
+  connection.query('SELECT * FROM ranking_jugadores;', (err, rows) => {
     if (err) throw err
-    res.json(rows)
+    res.json(Player.fromDbRows(rows))
   })
 })
 
