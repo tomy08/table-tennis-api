@@ -1,9 +1,5 @@
 import { Router } from 'express'
-import {
-  getClubs,
-  getClubById,
-  getClubRating,
-} from '../controllers/clubController.js'
+import { getClubs, getClubById, getClubRating } from '../controllers/club.js'
 
 const router = Router()
 
