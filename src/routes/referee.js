@@ -1,9 +1,9 @@
 import { Router } from 'express'
-import { getReferees, getRefereeById } from '../controllers/referee.js'
+import RefereeController from '../controllers/RefereeController.js'
 
 const router = Router()
 
-router.get('/', getReferees)
-router.get('/:id', getRefereeById)
+router.get('/', RefereeController.getReferees)
+router.get('/:id', RefereeController.getRefereeById)
 
 export default router
