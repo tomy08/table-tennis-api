@@ -1,9 +1,9 @@
 import { Router } from 'express'
-import { getTournaments, getTournamentById } from '../controllers/tournament.js'
+import TournamentController from '../controllers/TournamentController.js'
 
 const router = Router()
 
-router.get('/', getTournaments)
-router.get('/:id', getTournamentById)
+router.get('/', TournamentController.getTournaments)
+router.get('/:id', TournamentController.getTournamentById)
 
 export default router
