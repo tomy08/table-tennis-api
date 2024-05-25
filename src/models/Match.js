@@ -26,6 +26,7 @@ export default class Match {
       player1GamesWon: row.player1_games_won,
       player2GamesWon: row.player2_games_won,
     })
+
     return match
   }
 
@@ -74,7 +75,8 @@ export default class Match {
           if (rows.length === 0) {
             return resolve(null)
           }
-          resolve(Match.fromDbRow(rows[0]))
+          const match = Match.fromDbRows(rows)[0]
+          resolve(match)
         }
       )
     })
