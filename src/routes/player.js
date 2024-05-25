@@ -1,16 +1,11 @@
 import { Router } from 'express'
-import {
-  getPlayers,
-  getPlayerById,
-  getPlayerStatistics,
-  getPlayerRanking,
-} from '../controllers/player.js'
+import PlayerController from '../controllers/PlayerController.js'
 
 const router = Router()
 
-router.get('/', getPlayers)
-router.get('/stats', getPlayerStatistics)
-router.get('/ranking', getPlayerRanking)
-router.get('/:id', getPlayerById)
+router.get('/', PlayerController.getPlayers)
+router.get('/stats', PlayerController.getPlayerStatistics)
+router.get('/ranking', PlayerController.getPlayerRanking)
+router.get('/:id', PlayerController.getPlayerById)
 
 export default router
