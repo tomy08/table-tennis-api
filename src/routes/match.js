@@ -1,9 +1,9 @@
 import { Router } from 'express'
-import { getMatches, getMatchById } from '../controllers/match.js'
+import MatchController from '../controllers/MatchController.js'
 
 const router = Router()
 
-router.get('/', getMatches)
-router.get('/:id', getMatchById)
+router.get('/', MatchController.getMatches)
+router.get('/:id', MatchController.getMatchById)
 
 export default router

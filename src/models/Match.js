@@ -1,3 +1,5 @@
+import connection from '../db.js'
+
 export default class Match {
   constructor(row) {
     this.id = row.match_id
@@ -44,5 +46,37 @@ export default class Match {
       }
     })
     return Array.from(matchesMap.values())
+  }
+
+  static getAllMatches() {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        'SELECT * FROM MatchView ORDER BY match_id ASC;',
+        (err, rows) => {
+          if (err) {
+            return reject(err)
+          }
+          resolve(Match.fromDbRows(rows))
+        }
+      )
+    })
+  }
+
+  static getMatchById(id) {
+    return new Promise((resolve, reject) => {
+      connection.query(
+        'SELECT * FROM MatchView WHERE match_id = ?;',
+        [id],
+        (err, rows) => {
+          if (err) {
+            return reject(err)
+          }
+          if (rows.length === 0) {
+            return resolve(null)
+          }
+          resolve(Match.fromDbRow(rows[0]))
+        }
+      )
+    })
   }
 }
