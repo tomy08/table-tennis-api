@@ -17,8 +17,11 @@ connection.connect((err) => {
 
 app.use(express.json())
 
+app.use(express.static('public'))
+
+// Ruta para servir tu archivo HTML
 app.get('/', (req, res) => {
-  res.send('Hello, World!')
+  res.sendFile(__dirname + '/../public/index.html')
 })
 
 app.use('/player', PlayerRouter)
